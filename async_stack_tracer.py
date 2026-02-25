@@ -13,12 +13,16 @@ import time
 import random
 import sys
 
-if curses is None:
-    sys.stderr.write("The 'curses' module is not available in this Python environment.\n")
-    sys.stderr.write("On Windows, install the compatibility package and retry:\n")
-    sys.stderr.write("  python -m pip install windows-curses\n")
-    sys.stderr.write("Or run this script in WSL / a Unix-like terminal where curses is available.\n")
-    sys.exit(1)
+try:
+    import curses
+except ModuleNotFoundError:
+    if sys.platform == 'win32':
+        print("[ERROR] Missing native C-bindings for asynchronous terminal rendering.")
+        print("Run the following command to patch your environment:")
+        print("    pip install windows-curses")
+        sys.exit(1)
+    else:
+        raise
 
 
 class StealthManager:
