@@ -24,7 +24,6 @@ except ModuleNotFoundError:
     else:
         raise
 
-
 class StealthManager:
     """Manage stealth (blend-in) and boss-key (panic) behaviors.
 
@@ -96,17 +95,19 @@ class StealthManager:
         total_steps = 30
         for i in range(total_steps + 1):
             pct = int(i * 100 / total_steps)
-            bar = ('#' * (i)).ljust(total_steps)
-            print(f"[{bar}] {pct}%", end='\r')
+            bar = ('██' * (i)).ljust(total_steps)
+            sys.stdout.write(f"\r[{bar}] {pct}%")
+            sys.stdout.flush()
             time.sleep(1.5 / total_steps)
-        print()
+        # Clear progress bar line and move cursor to new line
+        sys.stdout.write("\r" + " " * 40 + "\r")
+        sys.stdout.flush()
         print("Installation complete. Exiting...")
         time.sleep(0.4)
         sys.exit(0)
 
 
 class TetrisGame:
-    WIDTH = 10
     HEIGHT = 20
     HEADER = "[RUNNING] async-stack-tracer v1.0.4 - memory heap visualization"
 
@@ -152,6 +153,11 @@ class TetrisGame:
     def __init__(self, stdscr, stealth_mgr: StealthManager):
         self.stdscr = stdscr
         self.stealth = stealth_mgr
+        # Calculate dynamic width: game board uses 2/3 of terminal width
+        # Each block is 2 characters, so divide by 2 to get block count
+        _, cols = stdscr.getmaxyx()
+        game_board_chars = int(cols * 2 / 3)
+        self.WIDTH = max(5, game_board_chars // 2)  # min 5 blocks wide
         self.grid = [[0 for _ in range(self.WIDTH)] for _ in range(self.HEIGHT)]
         self.score = 0
         self.level = 1
@@ -169,7 +175,7 @@ class TetrisGame:
         try:
             curses.start_color()
             curses.use_default_colors()
-            curses.init_pair(1, curses.COLOR_GREEN, -1)
+            curses.init_pair(1, curses.COLOR_WHITE, -1)
         except Exception:
             pass
 
@@ -279,7 +285,7 @@ class TetrisGame:
         # draw grid background as spaces and borders
         for y in range(self.HEIGHT):
             for x in range(self.WIDTH):
-                ch = '  ' if not self.grid[y][x] else '[]'
+                ch = '  ' if not self.grid[y][x] else '▓▓'
                 attr = curses.color_pair(1) if self.grid[y][x] else curses.A_NORMAL
                 try:
                     self.stdscr.addstr(origin_y + y, origin_x + x * 2, ch, attr)
@@ -290,7 +296,7 @@ class TetrisGame:
         for x, y in self._shape_coords(self.current):
             if y >= 0:
                 try:
-                    self.stdscr.addstr(origin_y + y, origin_x + x * 2, '[]', curses.color_pair(1))
+                    self.stdscr.addstr(origin_y + y, origin_x + x * 2, '▓▓', curses.color_pair(1))
                 except Exception:
                     pass
 
@@ -310,7 +316,7 @@ class TetrisGame:
                 # shift into stats area
                 nx = stats_x // 2 + x
                 ny = origin_y + 6 + y
-                self.stdscr.addstr(ny, nx * 2, '[]', curses.color_pair(1))
+                self.stdscr.addstr(ny, nx * 2, '▓▓', curses.color_pair(1))
         except Exception:
             pass
 
