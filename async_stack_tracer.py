@@ -92,23 +92,22 @@ class StealthManager:
             time.sleep(0.25)
 
         # Fake progress bar from 0 to 100 in ~1.5s
-        total_steps = 30
+        total_steps = 15
         for i in range(total_steps + 1):
             pct = int(i * 100 / total_steps)
             bar = ('██' * (i)).ljust(total_steps)
             sys.stdout.write(f"\r[{bar}] {pct}%")
             sys.stdout.flush()
             time.sleep(1.5 / total_steps)
-        # Clear progress bar line and move cursor to new line
-        sys.stdout.write("\r" + " " * 40 + "\r")
-        sys.stdout.flush()
+        # Complete the progress bar line with a newline
+        print()  # Move to new line after progress bar completes
         print("Installation complete. Exiting...")
         time.sleep(0.4)
         sys.exit(0)
 
 
 class TetrisGame:
-    HEIGHT = 20
+    HEIGHT = 15  # reduce height to make board shorter
     HEADER = "[RUNNING] async-stack-tracer v1.0.4 - memory heap visualization"
 
     SHAPES = {
